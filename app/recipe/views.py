@@ -6,30 +6,32 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 
+class RecipeAttrListViewSet(viewsets.GenericViewSet,
+                         mixins.ListModelMixin,
+                         mixins.CreateModelMixin):
+    """Shorten your code by adding duplicate code"""
+    authentication_classes =(authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user).order_by('-name')
 
-class TagListView( viewsets.GenericViewSet,mixins.ListModelMixin, mixins.CreateModelMixin,mixins.UpdateModelMixin):
-    authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes =(permissions.IsAuthenticated,)
+    def perform_create(self,serializer):
+        serializer.save(user=self.request.user)
+
+
+class TagListView(RecipeAttrListViewSet):
     queryset = Tag.objects.all()
 
     serializer_class = TagSerializer
 
-    def get_queryset(self):
-        return self.queryset.filter(user=self.request.user).order_by('-name')
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
 
-class IngredientListView(viewsets.GenericViewSet,mixins.ListModelMixin, mixins.CreateModelMixin):
-    authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes =(permissions.IsAuthenticated,)
+class IngredientListView(RecipeAttrListViewSet):
+
     queryset = Ingredient.objects.all()
 
     serializer_class = IngredientSerializer
 
-    def get_queryset(self):
-        return self.queryset.filter(user=self.request.user).order_by('-name')
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+
 
 
 #upadate tag model using APIView
